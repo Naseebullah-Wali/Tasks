@@ -1,7 +1,7 @@
 import express from 'express'
 import { Server,createServer } from 'http';
 import {Sequelize} from 'sequelize';
-import rout from '../router/pagerounter'
+import rout from '../router/pagerouter'
 const cookieParser = require('cookie-parser');
 import sequelize from '../dbConfig/dbConfig';
 const cors = require('cors');
@@ -16,7 +16,7 @@ class App {
     private server: Server;
     private sequelize: Sequelize
 
-    constructor (port=900, host='127.0.0.1'){
+    constructor (port=5000, host='127.0.0.1'){
         this.port = port;
         this.host = host;
         this.sequelize= sequelize;

@@ -3,25 +3,48 @@ import { Model, Column, DataType, Table,BeforeCreate,BeforeUpdate } from 'sequel
 import { hashPassword } from '../utils/password';
 
 
-@Table({ timestamps: true })
-export class User extends Model {
-  @Column({ primaryKey: true, autoIncrement: true })
-  id!: number;
 
-  @Column({ allowNull: false })
+@Table({
+  tableName: 'users',
+  timestamps: true,
+})
+class User extends Model {
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   firstName!: string;
 
-  @Column({ allowNull: false })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   lastName!: string;
 
-  @Column({ unique: true, allowNull: false })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   email!: string;
-
-  @Column({ allowNull: false })
+  
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
   password!: string;
 
-  @Column({ allowNull: true })
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+    set: function (this: User, value: string) {
+      this.setDataValue('token', value);
+    },
+    get: function (this: User) {
+      return this.getDataValue('token');
+    },
+  })
   token!: string;
+
 
 
   @BeforeCreate
@@ -36,6 +59,6 @@ export class User extends Model {
   static associate(models: any) {
     // define association here
   }
-
 }
+
 export default User;

@@ -3,167 +3,113 @@ import User from '../models/user'
 require("dotenv").config();
 import generateToken from '../utils/tokenCreater';
 import checkPassword from '../utils/checkPassword';
-import { Post } from '../models/post';
 
 export class userControllers{
     
 
-//Register
-public static UserPost = async (req:express.Request,res:express.Response)=>{
-    // await User.create(req.body)
-    const {firstName,lastName,email,password} = req.body;
-    const alreadyExist = await User.findOne({where:{
-        email
-    }}).catch((error)=>{console.log("Error:", error)});
-
-    if(alreadyExist){
-        return res.status(400).json({message: "User with email already exist!"})
-    }
-    else if(!alreadyExist){
-        const savedUser = await User.create(req.body).catch((error)=>{console.log("Error: ", error)});
-        const token = await generateToken(email);
-        res.cookie('mytoken', token, { httpOnly: true, maxAge: 349839086400000 }); // set the cookie with the token value
-        // console.error("this is the toke",token)
-        // console.error(req.cookies.mytoken)
-        res.send(`${firstName} ${lastName} is inserted, Thanks for registeration`)
-    }
-    
-}
-
-//Get: request for showing all users
-public static ShowUsers = async (req:express.Request,res:express.Response)=>{
-    const allUsers:object = await User.findAll()
-    res.send(allUsers);
-    
-    
-}
-
-//Get: find by ID
-public static FindById = async (req:express.Request,res:express.Response)=>{
-    const ByIdUser:object | null = await User.findOne({where: {id: req.params.id}})
-    res.send(ByIdUser);
-
-}
-
-//PUT REQ: Update User
-public static UpdateUser = async (req:express.Request,res:express.Response)=>{
-    // const requestedId = req.params.id;
-    const requestedUser:any = await User.findOne({where: {id: req.params.id} })
-    requestedUser.username = req.body.username;
-    requestedUser.password = req.body.password;
-    requestedUser.email= req.body.email
-    await requestedUser.save()
-    res.send("Updated")
-    
-}
-
-
-//DELETE REQ: Delete User
-public static DeleteUser= async (req:express.Request,res:express.Response)=>{
-    const requestedId:string = req.params.id;
-    const requestedUser = await User.destroy({where: {id: requestedId} })
-    res.send("deleted")
-}
-
-
-//LOGIN
-public static Login=async (req:express.Request,res:express.Response) => {
-    let {email, password} = req.body;
-    
-    const user = await User.findOne({where:{
-        email
-    }}).catch((error)=>{
-        console.log(error)
-    })
-
-    if(!user){
-       return res.status(400).json({message: "Email or password doesnt Match!"})
-    }
-    // if(user.password !== password){
-    //     return res.status(400).json({message: "Email or password doesnt Match!"})
-    // }
-    const isPasswordMatch = checkPassword(user, password);
-
-  if (!isPasswordMatch) {
-    return res.status(400).json({ message: "Email or password doesn't match!" })
-  }
-    const token = await generateToken(email);
-    res.cookie('mytoken', token, { httpOnly: true, maxAge: 10000006400000 }); // set the cookie with the token value
-    res.status(200).json({ message: "Welcome back!"});
-
-}
-
-
-
-public static createPost = async (req: express.Request, res: express.Response) => {
-    try {
-      const { title, content } = req.body;
-      const userId = req.user.id;
-      const post = await Post.create({
-        title,
-        content,
-        authorId: userId
+    //Register
+    public static UserPost = async (req: express.Request, res: express.Response) => {
+      const { firstName, lastName, email, password } = req.body;
+      const alreadyExist = await User.findOne({ where: { email } }).catch((error) => {
+        console.log("Error:", error);
       });
-      res.status(201).json({ post });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server Error" });
-    }
-  };
-  
-  public static updatePost = async (req: express.Request, res: express.Response) => {
-    try {
-      const postId = req.params.postId;
-      const userId = req.user.id;
-      const post = await Post.findOne({ where: { id: postId, authorId: userId } });
-      if (!post) {
-        return res.status(404).json({ message: "Post not found" });
+    
+      if (alreadyExist) {
+        return res.status(400).json({ message: "User with email already exists!" });
+      } else {
+        const user = await User.create(req.body).catch((error) => {
+          console.log("Error creating user:", error);
+        });
+    
+        if (user) {
+          const token = await generateToken(email);
+          user.token = token; // Set the token value
+    
+          await user.save(); // Save the user instance to persist the token in the database
+    
+          // Set the token in the response header
+          res.setHeader('Authorization', `Bearer ${token}`);
+    
+          res.status(200).json({ message: "Registration successful" });
+          res.send(`${firstName} ${lastName} is inserted. Thanks for registration.`);
+        } else {
+          return res.status(500).json({ message: "Error occurred while creating the user." });
+        }
       }
-      const { title, content } = req.body;
-      post.title = title;
-      post.content = content;
-      await post.save();
-      res.status(200).json({ post });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server Error" });
+    };
+    
+      
+      
+    
+    //Get: request for showing all users
+    public static ShowUsers = async (req:express.Request,res:express.Response)=>{
+        const allUsers:object = await User.findAll()
+        res.send(allUsers);
+        
+        
     }
-  };
-
-  public static deletePost = async (req: express.Request, res: express.Response) => {
-    try {
-      const postId = req.params.postId;
-      const userId = req.user.id;
-      const post = await Post.findOne({ where: { id: postId, authorId: userId } });
-      if (!post) {
-        return res.status(404).json({ message: "Post not found" });
-      }
-      await post.destroy();
-      res.status(204).send();
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server Error" });
+    
+    //Get: find by ID
+    public static FindById = async (req:express.Request,res:express.Response)=>{
+        const ByIdUser:object | null = await User.findOne({where: {id: req.params.id}})
+        res.send(ByIdUser);
+    
     }
-  };
-  
-  public static getPosts = async (req: express.Request, res: express.Response) => {
-    try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = 20;
-      const offset = (page - 1) * limit;
-      const posts = await Post.findAndCountAll({
-        limit,
-        offset,
-        order: [["createdAt", "DESC"]],
-        include: [{ model: User, attributes: ["firstName", "lastName"] }]
+    
+    //PUT REQ: Update User
+    public static UpdateUser = async (req:express.Request,res:express.Response)=>{
+        // const requestedId = req.params.id;
+        const requestedUser:any = await User.findOne({where: {id: req.params.id} })
+        requestedUser.username = req.body.username;
+        requestedUser.password = req.body.password;
+        requestedUser.email= req.body.email
+        await requestedUser.save()
+        res.send("Updated")
+        
+    }
+    
+    
+    //DELETE REQ: Delete User
+    public static DeleteUser= async (req:express.Request,res:express.Response)=>{
+        const requestedId:string = req.params.id;
+        const requestedUser = await User.destroy({where: {id: requestedId} })
+        res.send("deleted")
+    }
+    
+    
+    //LOGIN
+    public static Login = async (req: express.Request, res: express.Response) => {
+      const { email, password } = req.body;
+    
+      const user = await User.findOne({ where: { email } }).catch((error) => {
+        console.log(error);
       });
-      const totalPages = Math.ceil(posts.count / limit);
-      res.status(200).json({ posts: posts.rows, totalPages });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Server Error" });
-    }
-  };
-  
+    
+      if (!user) {
+        return res.status(400).json({ message: "Email or password doesn't match!" });
+      }
+    
+      const isPasswordMatch = checkPassword(user, password);
+    
+      if (!isPasswordMatch) {
+        return res.status(400).json({ message: "Email or password doesn't match!" });
+      }
+    
+      const token = await generateToken(email);
+    
+      // Update the user's token and save it to the database
+      user.token = token;
+      await user.save();
+    
+      // Set the token in the response header
+      res.setHeader('Authorization', `Bearer ${token}`);
+      res.status(200).json({ message: "Welcome back!" });
+    };
+    
+    
+      
 
-}
+
+
+
+}    

@@ -4,11 +4,11 @@ import User from '../models/user';
 
 
 const sequelize:Sequelize = new Sequelize({
-    database: 'lab1_db',
+    database: 'task',
     dialect: 'sqlite',
     username: 'us1',
     password: 'pass',
-    storage: 'BackEnd/db/dev.sqlite'
+    storage: 'db/dev.sqlite'
     
 
 });
@@ -18,7 +18,7 @@ sequelize.addModels(models)
 
 
 sequelize.sync().then(()=>{
-    console.log("database is synced")
+    console.log("database is synced and ready ! ")
 }).catch(
     (e)=>console.log(e)
 )
