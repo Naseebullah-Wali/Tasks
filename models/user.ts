@@ -1,7 +1,7 @@
 'use strict';
-import { Model, Column, DataType, Table,BeforeCreate,BeforeUpdate } from 'sequelize-typescript';
+import { Model, Column,HasMany, DataType, Table,BeforeCreate,BeforeUpdate } from 'sequelize-typescript';
 import { hashPassword } from '../utils/password';
-
+import BlogPost from './blogpost';
 
 
 @Table({
@@ -45,6 +45,8 @@ class User extends Model {
   })
   token!: string;
 
+  @HasMany(() => BlogPost)
+  blogPosts!: BlogPost[];
 
 
   @BeforeCreate

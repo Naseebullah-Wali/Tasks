@@ -1,7 +1,7 @@
 // instance of sequelize
 import {Sequelize} from 'sequelize-typescript';
 import User from '../models/user';
-
+import BlogPost from '../models/blogpost';
 
 const sequelize:Sequelize = new Sequelize({
     database: 'task',
@@ -12,7 +12,7 @@ const sequelize:Sequelize = new Sequelize({
     
 
 });
-const models = [User]
+const models = [User, BlogPost]
 
 sequelize.addModels(models)
 
