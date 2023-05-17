@@ -28,7 +28,7 @@ Welcome to the Awesome Blogging App! This application allows users to create and
 5. Retrieve a list of all blog posts using the `/blogPosts` endpoint.
 6. Update or delete specific blog posts using the `/blogPosts/:id` endpoint.
 
-**Note:** Detailed descriptions of each endpoint can be found in the [router folder](/router) and [documentation.md](/documentation.md) file.
+**Note:** Detailed descriptions of each endpoint can be found in the [router folder](/router) and [documentation.md](documentation.md) file.
 
 ## Contributing
 
